@@ -1,4 +1,5 @@
 from confluent_kafka import Producer
+import random
 import os
 import json
 
@@ -28,8 +29,8 @@ def produce_message(producer, topic, message):
     :param topic: name of topic
     :param message: message to be produced
     """
-    pkey = get_patient_key(resource)
-    resource_type = [('resource_type', resource.get('resourceType', '').encode('utf-8'))]
+    pkey = get_patient_key(message)
+    resource_type = [('resource_type', message.get('resourceType', '').encode('utf-8'))]
     while True:
         try: 
             producer.produce(topic, 
@@ -57,18 +58,28 @@ if __name__ == '__main__':
     files=[os.path.join(files_path, file) for file in os.listdir(files_path)
            if file.endswith('.json')]
 
-    for i in range(5):
-        print(files[i])
-        with open(files[i], 'r') as f:
-            f=json.load(f)
-            if f.get("resourceType") == "Bundle":
-                print(f'{len(f["entry"])} entries')
-                entries= f.get('entry', [])
-                for entry in entries:
-                    resource = entry.get('resource')
+    try:
+        while True:
+            rand_file= random.choice(files)
+            print(rand_file)
+            with open(rand_file, 'r') as f:
+                f=json.load(f)
+                if f.get("resourceType") == "Bundle":
+                    print(f'{len(f["entry"])} entries')
+                    entries= f.get('entry', [])
+                    # print(random_entry.get('resource'))
+                    # print(entries[0])
+                    # for entry in entries:
+                    patient= entries[0].get('resource')
+                    random_entry= random.choice(entries)
+                    produce_message(producer, topic, patient)
 
+                    resource = random_entry.get('resource')
                     produce_message(producer, topic, resource)
-    producer.flush()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        producer.flush()
 
 
 
