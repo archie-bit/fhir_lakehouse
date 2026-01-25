@@ -1,5 +1,6 @@
 /envs
 /logs
+/data/bronze
 *.log
 **/raw/*.json
-**/*.duckdb
+# **/*.duckdb
