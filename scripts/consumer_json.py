@@ -15,8 +15,9 @@ def save_to_bronze(batch_data, batch_id):
     if not batch_data:
         return
     df= pd.DataFrame(batch_data)
+    filename = f"data/bronze/fhir_batch_{batch_id}_{int(time.time())}.csv"
+    df["FILENAME"]= filename
     df= df.astype(str)
-    filename = f"data/bronze/fhir_batch_{batch_id}_{int(time.time())}.parquet"
     df.to_parquet(filename, index=False)
     print(f"Saved {len(batch_data)} resources to {filename}")
 
@@ -51,11 +52,15 @@ def consumer_loop(consumer:object, topic_list:list, batchsize= 100, timeout=10.0
             if msg.error():
                 print("Consumer error: {}".format(msg.error()))
                 continue
-
+            
             resource = json.loads(msg.value().decode('utf-8'))
-            batch_data.append(resource)
+            header= msg.headers()
+            batch_data.append({"RESOURCE_TYPE": header[0][1],
+                               "RAW_JSON":resource,
+                               "INGESTED_AT": msg.timestamp()[1],
+                               })
         
-            if len(batch_data) > batchsize:
+            if len(batch_data) >= batchsize:
                 save_to_bronze(batch_data, batch_count)
                 batch_data = []
                 batch_count += 1
