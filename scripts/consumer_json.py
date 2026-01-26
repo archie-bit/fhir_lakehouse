@@ -15,7 +15,7 @@ def save_to_bronze(batch_data, batch_id):
     if not batch_data:
         return
     df= pd.DataFrame(batch_data)
-    filename = f"data/bronze/fhir_batch_{batch_id}_{int(time.time())}.csv"
+    filename = f"data/bronze/fhir_batch_{batch_id}_{int(time.time())}.parquet"
     df["FILENAME"]= filename
     df= df.astype(str)
     df.to_parquet(filename, index=False)
