@@ -26,7 +26,14 @@ conn = snowflake.connector.connect(
 
 cur= conn.cursor()
 cur.execute(f'PUT file://{parquet_files} @stagetable')
-cur.execute("COPY INTO FHIR_RAW FROM @stagetable FILE_FORMAT = (TYPE = PARQUET) MATCH_BY_COLUMN_NAME = CASE_SENSITIVE")
+cur.execute("""COPY INTO FHIR_RAW FROM (
+            SELECT
+                $1:RESOURCE_TYPE::STRING,
+                PARSE_JSON($1:RAW_JSON),
+                $1:INGESTED_AT::TIMESTAMP_NTZ,
+                $1:FILENAME::STRING
+            FROM @stagetable
+            ) FILE_FORMAT = (TYPE = PARQUET)""")
 
 
 

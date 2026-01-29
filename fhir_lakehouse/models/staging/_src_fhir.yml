@@ -1,0 +1,11 @@
+sources:
+    - name: BRONZE
+      database: FHIR_DATALAKE
+      schema: BRONZE
+      tables:
+          - name: FHIR_RAW
+            columns:
+                - name: RESOURCE_TYPE
+                - name: RAW_JSON
+                - name: INGESTED_AT
+                - name: FILENAME
