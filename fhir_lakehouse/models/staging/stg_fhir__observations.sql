@@ -13,6 +13,8 @@ flattened_observations AS(
         RAW_JSON:valueQuantity:value::FLOAT AS observation_value,
         RAW_JSON:valueQuantity:unit::STRING AS observation_unit,
         RAW_JSON:effectiveDateTime::TIMESTAMP_NTZ AS observation_at,
+        INGESTED_AT AS ingested_at
+
     FROM observation
 )
 

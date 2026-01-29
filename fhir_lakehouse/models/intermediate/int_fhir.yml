@@ -1,0 +1,35 @@
+models:
+    - name: int_patients
+      columns:
+          - name: patient_id
+            tests:
+                - unique
+                - not_null
+    - name: int_observations
+      columns:
+          - name: observation_id
+            tests:
+                - unique
+                - not_null
+          - name: patient_id
+            tests:
+                - relationships:
+                      arguments:
+                          to: ref('int_patients')
+                          field: patient_id
+                # - relationships:
+                #       arguments:
+                #           to: ref('int_encounters')
+                #           field: encounter_id
+    - name: int_encounters
+      columns:
+          - name: encounter_id
+            tests:
+                - unique
+                - not_null
+          - name: patient_id
+            tests:
+                - relationships:
+                      arguments:
+                          to: ref('int_patients')
+                          field: patient_id

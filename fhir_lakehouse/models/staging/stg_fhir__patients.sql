@@ -14,20 +14,21 @@ flattened_patients AS (
        RAW_JSON:gender::STRING AS patient_gender,
        RAW_JSON:extension[0]:extension[1]:valueString::STRING AS patient_race,
        RAW_JSON:birthDate::DATE AS patient_birthdate,
-       YEAR(getdate()) - YEAR(RAW_JSON:birthDate::DATE) AS patient_age,
+       DATEDIFF(year, RAW_JSON:birthDate::DATE, CURRENT_DATE()) AS patient_age,
        RAW_JSON:telecom[0]:value::STRING AS patient_number,
        RAW_JSON:address[0]:city::STRING AS patient_city,
        RAW_JSON:address[0]:state::STRING AS patient_state,
        RAW_JSON:address[0]:country::STRING AS patient_country,
        RAW_JSON:maritalStatus:coding[0]:code::STRING AS patient_marital,
+       INGESTED_AT AS ingested_at
        
     FROM patient
-),
-test as (
-    SELECT 
-        TYPEOF(RAW_JSON), 
-        RAW_JSON 
-    FROM {{ source('BRONZE', 'FHIR_RAW') }}
-    ORDER BY TYPEOF(RAW_JSON) desc
 )
+-- test as (
+--     SELECT 
+--         TYPEOF(RAW_JSON), 
+--         RAW_JSON 
+--     FROM {{ source('BRONZE', 'FHIR_RAW') }}
+--     ORDER BY TYPEOF(RAW_JSON) desc
+-- )
 SELECT * FROM flattened_patients

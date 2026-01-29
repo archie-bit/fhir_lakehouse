@@ -13,6 +13,7 @@ encounter_flattened AS(
         RAW_JSON:period:start::TIMESTAMP_NTZ AS encounter_start,
         RAW_JSON:period:end::TIMESTAMP_NTZ AS encounter_end,
         RAW_JSON:location[0]:location:display::STRING AS encounter_location,
+        INGESTED_AT AS ingested_at
 
     FROM encounter
 )
