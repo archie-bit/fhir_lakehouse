@@ -2,6 +2,7 @@ import snowflake.connector
 from dotenv import load_dotenv
 from pathlib import Path
 import os
+import shutil
 
 load_dotenv()
 
@@ -13,30 +14,37 @@ DATABASE= os.getenv('SNOWFLAKE_DATABASE')
 SCHEMA= os.getenv('SNOWFLAKE_SCHEMA_BRONZE')
 
 
+ingested_dir = Path(__file__).resolve().parent.parent / "data" / "ingested"
+ingested_dir.mkdir(parents=True, exist_ok=True)
 base_dir= Path(__file__).resolve().parent.parent / "data" / "bronze"
 parquet_files = str(base_dir / "*.parquet").replace("\\", "/")
-conn = snowflake.connector.connect(
-    user=USER,
-    password=PASSWORD,
-    account=ACCOUNT,
-    warehouse=WAREHOUSE,
-    database=DATABASE,
-    schema= SCHEMA
-    )
 
-cur= conn.cursor()
-cur.execute(f'PUT file://{parquet_files} @stagetable')
-cur.execute("""COPY INTO FHIR_RAW FROM (
-            SELECT
-                $1:RESOURCE_TYPE::STRING,
-                PARSE_JSON($1:RAW_JSON),
-                $1:INGESTED_AT::TIMESTAMP_NTZ,
-                $1:FILENAME::STRING
-            FROM @stagetable
-            ) FILE_FORMAT = (TYPE = PARQUET)""")
+try:
+    conn = snowflake.connector.connect(
+        user=USER,
+        password=PASSWORD,
+        account=ACCOUNT,
+        warehouse=WAREHOUSE,
+        database=DATABASE,
+        schema= SCHEMA
+        )
 
+    cur= conn.cursor()
+    cur.execute(f'PUT file://{parquet_files} @stagetable')
+    cur.execute("""COPY INTO FHIR_RAW FROM (
+                SELECT
+                    $1:RESOURCE_TYPE::STRING,
+                    PARSE_JSON($1:RAW_JSON),
+                    $1:INGESTED_AT::TIMESTAMP_NTZ,
+                    $1:FILENAME::STRING
+                FROM @stagetable
+                ) FILE_FORMAT = (TYPE = PARQUET)""")
 
+    for file_path in base_dir.glob("*.parquet"):
+        shutil.move(str(file_path), str(ingested_dir / file_path.name))
 
+except Exception as e:
+    print(e)
 # cur.execute(f'LIST @"stagetable"')
 # for row in cur.fetchall():
 #     print("test")
@@ -48,5 +56,6 @@ cur.execute("""COPY INTO FHIR_RAW FROM (
 # cur.execute('SELECT * FROM FHIR_RAW')
 # for row in cur.fetchall():
 #     print(row)
-cur.close()
-conn.close()
+finally:
+    cur.close()
+    conn.close()

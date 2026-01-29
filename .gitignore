@@ -3,6 +3,7 @@
 /logs
 /scripts/test
 /data/bronze
+/data/ingested
 *.log
 **/raw/*.json
 # **/*.duckdb
