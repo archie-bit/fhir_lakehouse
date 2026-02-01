@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
     try:
         while True:
+
             rand_file= random.choice(files)
             print(rand_file)
             with open(rand_file, 'r') as f:
@@ -67,15 +68,22 @@ if __name__ == '__main__':
                 if f.get("resourceType") == "Bundle":
                     print(f'{len(f["entry"])} entries')
                     entries= f.get('entry', [])
+                    if not entries:
+                        continue
                     # print(random_entry.get('resource'))
                     # print(entries[0])
                     # for entry in entries:
                     patient= entries[0].get('resource')
-                    random_entry= random.choice(entries)
                     produce_message(producer, topic, patient)
 
-                    resource = random_entry.get('resource')
-                    produce_message(producer, topic, resource)
+                    clinical_entries = entries[1:]
+                    if clinical_entries:
+                        sample_size = min(len(clinical_entries), 15)
+                        random_batch = random.sample(clinical_entries, sample_size)
+
+                        for entry in random_batch:
+                            resource = entry.get('resource')
+                            produce_message(producer, topic, resource)
     except KeyboardInterrupt:
         pass
     finally:
