@@ -13,14 +13,16 @@ models:
                 - not_null
           - name: patient_id
             tests:
+                - not_null
                 - relationships:
                       arguments:
                           to: ref('int_patients')
                           field: patient_id
-                # - relationships:
-                #       arguments:
-                #           to: ref('int_encounters')
-                #           field: encounter_id
+                - relationships:
+                      arguments:
+                          to: ref('int_encounters')
+                          field: encounter_id
+                          severity: warn
     - name: int_encounters
       columns:
           - name: encounter_id
@@ -29,6 +31,32 @@ models:
                 - not_null
           - name: patient_id
             tests:
+                - relationships:
+                      arguments:
+                          to: ref('int_patients')
+                          field: patient_id
+    - name: int_conditions
+      columns:
+          - name: condition_id
+            tests:
+                - unique
+                - not_null
+          - name: patient_id
+            tests:
+                - not_null
+                - relationships:
+                      arguments:
+                          to: ref('int_patients')
+                          field: patient_id
+    - name: int_procedures
+      columns:
+          - name: procedure_id
+            tests:
+                - unique
+                - not_null
+          - name: patient_id
+            tests:
+                - not_null
                 - relationships:
                       arguments:
                           to: ref('int_patients')

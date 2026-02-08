@@ -9,6 +9,8 @@ encounter_flattened AS(
         RAW_JSON:type[0]:coding[0]:code::STRING AS encounter_type_code,
         RAW_JSON:type[0]:text::STRING AS encounter_type,
         RAW_JSON:status::STRING AS encounter_status,
+        RAW_JSON:reasonCode[0]:coding[0]:code::STRING AS encounter_reason_code,
+        RAW_JSON:reasonCode[0]:coding[0]:display::STRING AS encounter_reason,
         RAW_JSON:participant[0]:individual:display::STRING AS encounter_participant,
         RAW_JSON:period:start::TIMESTAMP_NTZ AS encounter_start,
         RAW_JSON:period:end::TIMESTAMP_NTZ AS encounter_end,

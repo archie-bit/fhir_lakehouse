@@ -1,9 +1,182 @@
-name: redpanda-services
+# name: redpanda-services
+# networks:
+#     redpanda_network:
+#         driver: bridge
+# volumes:
+#     redpanda: null
+# services:
+#     redpanda:
+#         image: docker.redpanda.com/redpandadata/redpanda:v25.3.4
+#         container_name: redpanda
+#         command:
+#             - redpanda start
+#             - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+#             - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+#             - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+#             - --advertise-pandaproxy-addr internal://redpanda:8082,external://localhost:18082
+#             - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+#             - --rpc-addr redpanda:33145
+#             - --advertise-rpc-addr redpanda:33145
+#             - --mode dev-container
+#             - --smp 1
+#         ports:
+#             - 18081:18081
+#             - 18082:18082
+#             - 19092:19092
+#             - 19644:9644
+#         volumes:
+#             - redpanda:/var/lib/redpanda/data
+#         networks:
+#             - redpanda_network
+#         healthcheck:
+#             test:
+#                 [
+#                     "CMD-SHELL",
+#                     "rpk cluster health | grep -E 'Healthy:.+true' || exit 1",
+#                 ]
+#             interval: 15s
+#             timeout: 3s
+#             retries: 5
+#             start_period: 5s
+#     console:
+#         image: docker.redpanda.com/redpandadata/console:v3.4.0
+#         entrypoint: /bin/sh
+#         command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+#         environment:
+#             CONFIG_FILEPATH: /tmp/config.yml
+#             CONSOLE_CONFIG_FILE: |
+#                 kafka:
+#                   brokers: ["redpanda:9092"]
+#                 schemaRegistry:
+#                   enabled: true
+#                   urls: ["http://redpanda:8081"]
+#                 redpanda:
+#                   adminApi:
+#                     enabled: true
+#                     urls: ["http://redpanda:9644"]
+#                 kafkaConnect:
+#                   enabled: true
+#                   clusters:
+#                     - name: local-connect-cluster
+#                       url: http://connect:8083
+#         ports:
+#             - 8080:8080
+#         networks:
+#             - redpanda_network
+#         depends_on:
+#             - redpanda
+
+# x-airflow-common: &airflow-common
+#     build:
+#         image: apache/airflow:2.9.0-python3.10
+#     environment: &airflow-common-env
+#         AIRFLOW__CORE__EXECUTOR: LocalExecutor
+#         AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+#         AIRFLOW__CORE__FERNET_KEY: ""
+#         AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+#         AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+#         AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+#         AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+#     volumes:
+#         - ./dags:/opt/airflow/dags
+#         - ./logs:/opt/airflow/logs
+#         - ./plugins:/opt/airflow/plugins
+#         - ./src:/opt/workspace
+#     networks:
+#         - de-network
+
+# services:
+#     postgres:
+#         image: postgres:15
+#         container_name: postgres
+#         environment:
+#             POSTGRES_USER: ${POSTGRES_USER}
+#             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#             POSTGRES_DB: ${POSTGRES_DB}
+#         volumes:
+#             - fhir_lakehouse_postgres_data:/var/lib/postgresql/data
+#         ports:
+#             - "5432:5432"
+#         healthcheck:
+#             test:
+#                 [
+#                     "CMD-SHELL",
+#                     "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+#                 ]
+#             interval: 5s
+#             timeout: 5s
+#             retries: 5
+#         restart: always
+#         networks:
+#             - de-network
+
+#     airflow-init:
+#         <<: *airflow-common
+#         container_name: airflow-init
+#         command: >
+#             bash -c "
+#             airflow db migrate &&
+#             airflow connections create-default-connections &&
+#             airflow users create --username admin --password admin --firstname Airflow --lastname Admin --role Admin --email admin@example.com || true
+#             "
+#         depends_on:
+#             postgres:
+#                 condition: service_healthy
+
+#     airflow:
+#         <<: *airflow-common
+#         container_name: airflow
+#         ports:
+#             - "9091:9090"
+#         healthcheck:
+#             test: ["CMD", "curl", "--fail", "http://localhost:9090/health"]
+#             interval: 30s
+#             timeout: 10s
+#             retries: 5
+#             start_period: 30s
+#         command: bash -c "exec airflow webserver"
+#         depends_on:
+#             airflow-init:
+#                 condition: service_completed_successfully
+
+#     airflow-scheduler:
+#         <<: *airflow-common
+#         container_name: airflow-scheduler
+#         command: bash -c "exec airflow scheduler"
+#         depends_on:
+#             airflow-init:
+#                 condition: service_completed_successfully
+
+name: fhir-lakehouse-platform
+
 networks:
-    redpanda_network:
+    de-network:
         driver: bridge
+
 volumes:
-    redpanda: null
+    redpanda:
+        external: true
+        name: redpanda-services_redpanda
+    postgres_data:
+
+x-airflow-common: &airflow-common
+    build:
+        context: .
+        dockerfile: Dockerfile.airflow
+    environment: &airflow-common-env
+        AIRFLOW__CORE__EXECUTOR: LocalExecutor
+        AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+        AIRFLOW__CORE__FERNET_KEY: ""
+        AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+        AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+        - ./dags:/opt/airflow/dags
+        - ./logs:/opt/airflow/logs
+        - ./plugins:/opt/airflow/plugins
+        - ./src:/opt/workspace
+    networks:
+        - de-network
+
 services:
     redpanda:
         image: docker.redpanda.com/redpandadata/redpanda:v25.3.4
@@ -27,7 +200,7 @@ services:
         volumes:
             - redpanda:/var/lib/redpanda/data
         networks:
-            - redpanda_network
+            - de-network
         healthcheck:
             test:
                 [
@@ -35,33 +208,71 @@ services:
                     "rpk cluster health | grep -E 'Healthy:.+true' || exit 1",
                 ]
             interval: 15s
-            timeout: 3s
-            retries: 5
-            start_period: 5s
+
     console:
         image: docker.redpanda.com/redpandadata/console:v3.4.0
-        entrypoint: /bin/sh
-        command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+        container_name: redpanda-console
         environment:
-            CONFIG_FILEPATH: /tmp/config.yml
-            CONSOLE_CONFIG_FILE: |
-                kafka:
-                  brokers: ["redpanda:9092"]
-                schemaRegistry:
-                  enabled: true
-                  urls: ["http://redpanda:8081"]
-                redpanda:
-                  adminApi:
-                    enabled: true
-                    urls: ["http://redpanda:9644"]
-                kafkaConnect:
-                  enabled: true
-                  clusters:
-                    - name: local-connect-cluster
-                      url: http://connect:8083
+            KAFKA_BROKERS: "redpanda:9092"
         ports:
-            - 8080:8080
+            - 8081:8080
         networks:
-            - redpanda_network
+            - de-network
         depends_on:
-            - redpanda
+            redpanda:
+                condition: service_healthy
+
+    postgres:
+        image: postgres:15
+        container_name: postgres
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        networks:
+            - de-network
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        restart: always
+
+    airflow-init:
+        <<: *airflow-common
+        container_name: airflow-init
+        command: >
+            bash -c "
+            airflow db migrate &&
+            airflow connections create-default-connections &&
+            airflow users create --username admin --password admin --firstname Airflow --lastname Admin --role Admin --email admin@example.com || true
+            "
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    airflow-webserver:
+        <<: *airflow-common
+        container_name: airflow-webserver
+        ports:
+            - "9091:8080"
+        command: bash -c "exec airflow webserver"
+        depends_on:
+            airflow-init:
+                condition: service_completed_successfully
+
+    airflow-scheduler:
+        <<: *airflow-common
+        container_name: airflow-scheduler
+        command: bash -c "exec airflow scheduler"
+        depends_on:
+            airflow-init:
+                condition: service_completed_successfully
