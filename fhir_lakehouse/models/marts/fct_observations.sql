@@ -1,5 +1,6 @@
 WITH fct_observations AS(
     SELECT
+        obs.observation_item_sk,
         obs.observation_id,
         ptnt.patient_id,
         ptnt.age_bucket,

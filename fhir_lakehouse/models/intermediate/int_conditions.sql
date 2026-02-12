@@ -7,7 +7,10 @@
 }}
 
 WITH raw_conditions AS(
-    SELECT * FROM {{ ref('stg_fhir__conditions') }}
+    SELECT 
+        {{ dbt_utils.generate_surrogate_key(['condition_id', 'condition_category']) }} AS condition_item_sk,
+        * 
+    FROM {{ ref('stg_fhir__conditions') }}
     {%if dbt.is_incremental()%}
         where ingested_at >= (SELECT COALESCE(max(ingested_at), '1900-01-01') from {{ this }})
     {%endif%}

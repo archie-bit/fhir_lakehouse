@@ -56,12 +56,10 @@ component_obs AS (
         REGEXP_REPLACE(RAW_JSON:encounter:reference::STRING, '^(urn:uuid:|Patient/)', '') AS encounter_id,
 
         obs.RAW_JSON:effectiveDateTime::TIMESTAMP_NTZ AS observation_at,
-        -- Use the component's text as the name (e.g., "Housing Status")
         COALESCE(
             comp.value:code:text::STRING,
             comp.value:code:coding[0]:display::STRING
         ) AS observation_name,
-        -- Result logic inside the component
         COALESCE(
             comp.value:valueQuantity:value::STRING,
             comp.value:valueCodeableConcept:text::STRING,

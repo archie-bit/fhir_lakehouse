@@ -7,7 +7,10 @@
 }}
 
 WITH raw_observations AS(
-    SELECT * FROM {{ ref('stg_fhir__observations') }}
+    SELECT 
+        {{ dbt_utils.generate_surrogate_key(['observation_id', 'loinc_code']) }} AS observation_item_sk,
+        * 
+    FROM {{ ref('stg_fhir__observations') }}
     {%if dbt.is_incremental()%}
         where ingested_at >= (SELECT COALESCE(max(ingested_at), '1900-01-01') from {{ this }})
     {%endif%}

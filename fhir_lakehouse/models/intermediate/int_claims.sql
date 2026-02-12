@@ -7,7 +7,10 @@
 }}
 
 WITH deduped_claims AS (
-    SELECT * FROM {{ ref('stg_fhir__claims') }}
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['claim_id', 'item_sequence']) }} AS claim_item_sk,
+        *
+     FROM {{ ref('stg_fhir__claims') }}
     {% if is_incremental() %}
     WHERE ingested_at >= (SELECT MAX(ingested_at) FROM {{ this }})
     {% endif %}

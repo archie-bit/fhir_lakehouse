@@ -7,7 +7,10 @@
 }}
 
 WITH raw_procedures AS(
-    SELECT * FROM {{ ref('stg_fhir__procedures') }}
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['procedure_id', 'procedure_code']) }} AS procedure_item_sk, 
+        * 
+    FROM {{ ref('stg_fhir__procedures') }}
     {%if dbt.is_incremental()%}
         where ingested_at >= (SELECT COALESCE(max(ingested_at), '1900-01-01') from {{ this }})
     {%endif%}

@@ -1,5 +1,6 @@
 .env
 /envs
+/dage/__pycache__
 /logs
 /scripts/test
 /data/bronze

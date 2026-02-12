@@ -1,5 +1,6 @@
 WITH fct_conditions AS(
     SELECT
+        cond.condition_item_sk,
         cond.condition_id,
         ptnt.patient_id,
         enct.encounter_id,

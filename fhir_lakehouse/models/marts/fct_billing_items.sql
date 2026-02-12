@@ -4,6 +4,7 @@ WITH claim_items AS (
 
 final AS (
     SELECT
+        cli.claim_item_sk,
         cli.claim_id,
         cli.item_sequence,
         cli.patient_id,
