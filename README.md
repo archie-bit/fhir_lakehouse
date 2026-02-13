@@ -51,7 +51,7 @@ I implemented a multi-layer transformation strategy to ensure data quality and g
 
 ---
 
-###  Engineering Challenges & Trade-offs
+### Challenges & Trade-offs
 *Every project has hurdles. Here is how I solved the biggest ones:*
 
 **1. Handling "Perfect" Synthetic Data**
@@ -67,24 +67,24 @@ I implemented a multi-layer transformation strategy to ensure data quality and g
 
 ---
 
-### **The Dashboard (Business Value)**
+### **The Dashboard**
 *The final output is a suite of reports tailored for specific hospital stakeholders.*
 
-#### Page 1: Financial Performance (CFO View)
+#### Page 1: Financial Performance
 * **Focus:** Revenue Cycle Management & Payer Mix.
 * **Key Metric:** Revenue and Payer Concentration.
 * **Insight:** Allows to identify if the hospital is over-reliant on a single insurance payer (e.g., Medicare).
 
 ![CFO Dashboard](docs/images/dashboard_finance.png)
 
-#### **Page 2: Operations & Efficiency (COO View)**
+#### **Page 2: Operations & Efficiency**
 * **Focus:** Throughput & Bottlenecks.
 * **Key Metric:** Average Length of Stay (LOS) vs. Wait Times.
 * **Visual:** Hourly Heatmap of ER visits to optimize staffing schedules (Peak Hour Detection).
 
 ![COO Dashboard](docs/images/dashboard_operations.png)
 
-#### **Page 3: Population Health (CMO View)**
+#### **Page 3: Population Health**
 * **Focus:** Clinical Risk Stratification.
 * **Key Metric:** Chronic Disease Rate & Comorbidity Index.
 * **Visual:** Risk Scatter Plot (Cost vs. Complexity) identifying "Frequent Flyers" patients who are high-cost and high-frequency.
