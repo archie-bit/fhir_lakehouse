@@ -43,7 +43,7 @@ I implemented a multi-layer transformation strategy to ensure data quality and g
 #### **3. Gold Layer (Business Aggregates)**
 * **Goal:** Pre-computed metrics for the dashboard (Star Schema).
 * **Models:**
-    * `dim_patients`: A "Golden Record" of patient demographics (current address, living status).
+    * `dim_patients`: patient demographics (current address, race, age).
     * `fct_encounters`: Transactional fact table for hospital visits.
     * `fct_claims`: Financial ledger linking costs to clinical outcomes.
 
@@ -54,11 +54,11 @@ I implemented a multi-layer transformation strategy to ensure data quality and g
 ### Challenges & Trade-offs
 *Every project has hurdles. Here is how I solved the biggest ones:*
 
-**1. Handling "Perfect" Synthetic Data**
+**1. Handling Synthetic Data**
 * **Problem:** Synthea generates 100% "Active" claims, which made financial analysis look unrealistic (0% denial rate).
 * **Solution:** I engineered "Derived Metrics" in the Gold layer, such as **Revenue Per Patient** and **Comorbidity Indexes**, to focus on *utilization intensity* rather than simple claim status. This allows the dashboard to drive value even with synthetic constraints.
 
-**2. The "Many-to-Many" Trap (Conditions vs. Claims)**
+**2. The Many-to-Many Trap (Conditions vs. Claims)**
 * Problem Patients have multiple conditions and multiple claims, but they don't link directly. Filtering by "Diabetes" caused revenue numbers to go blank or duplicate in the BI tool.
 * Solution: Implemented Bi-Directional Filtering in the Power BI semantic model and created a "Bridge Table" strategy in dbt to accurately attribute costs to disease cohorts without Cartesian explosions.
 
@@ -68,7 +68,6 @@ I implemented a multi-layer transformation strategy to ensure data quality and g
 ---
 
 ### **The Dashboard**
-*The final output is a suite of reports tailored for specific hospital stakeholders.*
 
 #### Page 1: Financial Performance
 * **Focus:** Revenue Cycle Management & Payer Mix.
