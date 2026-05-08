@@ -60,7 +60,7 @@ I implemented a multi-layer transformation strategy to ensure data quality and g
 
 **2. The Many-to-Many Trap (Conditions vs. Claims)**
 * Problem Patients have multiple conditions and multiple claims, but they don't link directly. Filtering by "Diabetes" caused revenue numbers to go blank or duplicate in the BI tool.
-* Solution: Implemented Bi-Directional Filtering in the Power BI semantic model and created a "Bridge Table" strategy in dbt to accurately attribute costs to disease cohorts without Cartesian explosions.
+* Solution: Resolved a many-to-many fan-out problem between clinical conditions and financial claims by pre-computing disease-cohort metrics as dedicated Gold-layer aggregation models in dbt (AGG_ENCOUNTER_EFFICIENCY, AGG_PATIENT_VITALS_BY_AGE, AGG_PAYER_REVENUE_SUMMARY), avoiding Cartesian joins at query time.
 
 **3. Orchestration Reliability**
 * I chose Airflow over simple cron jobs to enable backfilling and alerting. If the dbt test suite fails (e.g., `unique_id` check on `dim_patients`), the pipeline halts preventing bad data from reaching the CFO's dashboard.
