@@ -12,7 +12,7 @@ WITH deduped_claims AS (
         *
      FROM {{ ref('stg_fhir__claims') }}
     {% if is_incremental() %}
-    WHERE ingested_at >= (SELECT MAX(ingested_at) FROM {{ this }})
+        WHERE ingested_at >= (SELECT MAX(ingested_at) FROM {{ this }})
     {% endif %}
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY claim_id, item_sequence 

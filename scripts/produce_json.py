@@ -2,6 +2,7 @@ from confluent_kafka import Producer
 import random
 import os
 import json
+from create_topic import CreateTopic
 
 
 def get_patient_key(resource):
@@ -51,8 +52,11 @@ if __name__ == '__main__':
              'compression.type': 'gzip',
              }
     producer= init_producer(config)
-    topic= 'test0'
+    
+    topics_to_check = ['test0']
+    CreateTopic(bootstrap_server, topics_to_check)
 
+    topic= 'test0'
 
     files_path='./data/raw/'
     files=[os.path.join(files_path, file) for file in os.listdir(files_path)

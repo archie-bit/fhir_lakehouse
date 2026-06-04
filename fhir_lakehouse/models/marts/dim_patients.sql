@@ -4,7 +4,7 @@ WITH dim_patients AS(
         patient_given_names AS patient_name,
         patient_gender,
         patient_birthdate,
-        patient_age,
+        DATEDIFF(year, patient_birthdate, CURRENT_DATE()) AS patient_age,
         case 
             when patient_age <18 then 'Under 18'
             when patient_age between 18 and 24 then '18-24'

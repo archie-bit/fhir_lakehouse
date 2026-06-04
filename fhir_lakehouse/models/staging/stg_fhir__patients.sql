@@ -14,7 +14,6 @@ flattened_patients AS (
        RAW_JSON:gender::STRING AS patient_gender,
        RAW_JSON:extension[0]:extension[1]:valueString::STRING AS patient_race,
        RAW_JSON:birthDate::DATE AS patient_birthdate,
-       DATEDIFF(year, RAW_JSON:birthDate::DATE, CURRENT_DATE()) AS patient_age,
        RAW_JSON:telecom[0]:value::STRING AS patient_number,
        RAW_JSON:address[0]:city::STRING AS patient_city,
        RAW_JSON:address[0]:state::STRING AS patient_state,
