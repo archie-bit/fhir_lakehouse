@@ -31,9 +31,9 @@ def initialize_snowflake():
             "CREATE SCHEMA IF NOT EXISTS BRONZE;",
             "USE SCHEMA BRONZE;",
             
-            "CREATE OR REPLACE STAGE STAGETABLE;",
+            "CREATE STAGE IF NOT EXISTS STAGETABLE;",
             
-            """CREATE OR REPLACE TABLE BRONZE.FHIR_RAW (
+            """CREATE TABLE IF NOT EXISTS BRONZE.FHIR_RAW (
                 RESOURCE_TYPE STRING,
                 RAW_JSON      VARIANT,
                 INGESTED_AT   TIMESTAMP_NTZ,
